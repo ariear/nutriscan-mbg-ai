@@ -1,7 +1,3 @@
-"""
-Load TensorFlow SavedModel saat startup FastAPI.
-Model di-load sekali dan disimpan di app.state.model.
-"""
 import logging
 from pathlib import Path
 
@@ -13,10 +9,6 @@ logger = logging.getLogger(__name__)
 
 
 def load_saved_model(model_path: Path = MODEL_PATH) -> tf.types.experimental.GenericFunction:
-    """
-    Load SavedModel menggunakan tf.saved_model.load().
-    Model di-export dari notebook dengan model.export(SAVED_MODEL_PATH).
-    """
     logger.info(f"Loading SavedModel dari: {model_path}")
     if not model_path.exists():
         raise FileNotFoundError(

@@ -1,7 +1,3 @@
-"""
-Router untuk endpoint inference.
-POST /predict – menerima gambar (multipart/form-data) dan mengembalikan analisis nutrisi.
-"""
 from fastapi import APIRouter, File, HTTPException, Request, UploadFile
 from fastapi.responses import JSONResponse
 
@@ -22,7 +18,6 @@ MAX_FILE_SIZE_MB = 10
     ),
 )
 async def predict(request: Request, file: UploadFile = File(...)):
-    # Validasi tipe file
     content_type = file.content_type or ""
     if content_type not in ALLOWED_CONTENT_TYPES:
         raise HTTPException(
@@ -31,10 +26,8 @@ async def predict(request: Request, file: UploadFile = File(...)):
                    f"Gunakan: {', '.join(ALLOWED_CONTENT_TYPES)}",
         )
 
-    # Baca bytes gambar
     image_bytes = await file.read()
 
-    # Validasi ukuran file
     size_mb = len(image_bytes) / (1024 * 1024)
     if size_mb > MAX_FILE_SIZE_MB:
         raise HTTPException(
@@ -42,7 +35,6 @@ async def predict(request: Request, file: UploadFile = File(...)):
             detail=f"Ukuran file terlalu besar: {size_mb:.1f} MB. Maksimum {MAX_FILE_SIZE_MB} MB.",
         )
 
-    # Ambil inference service dari app state
     inference_service = request.app.state.inference_service
 
     try:

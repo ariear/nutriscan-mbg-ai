@@ -1,7 +1,3 @@
-"""
-FastAPI application entrypoint.
-Model dan fuzzy classifier di-load sekali saat startup via lifespan.
-"""
 import logging
 from contextlib import asynccontextmanager
 
@@ -19,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load model & fuzzy classifier sekali saat startup, cleanup saat shutdown."""
     logger.info("Memuat model dan fuzzy classifier...")
     app.state.model             = load_saved_model()
     app.state.fuzzy_clf         = FuzzyNutritionClassifier()
@@ -29,7 +24,6 @@ async def lifespan(app: FastAPI):
     )
     logger.info("Server siap menerima request.")
     yield
-    # Cleanup (opsional)
     logger.info("Server shutdown.")
 
 
@@ -44,7 +38,6 @@ app = FastAPI(
     lifespan    = lifespan,
 )
 
-# CORS – izinkan semua origin (ubah sesuai kebutuhan production)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -52,7 +45,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Router
 app.include_router(inference.router)
 
 

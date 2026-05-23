@@ -1,1 +1,9 @@
+api/.env
+
 models/
+api/models/
+
+models.zip
+
+__pycache__/
+*.pyc
