@@ -1,0 +1,15 @@
+# ── Core ─────────────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9   # multipart/form-data (upload file)
+
+# ── ML / Inference ────────────────────────────────────────────────────────────
+tensorflow>=2.15.0        # SavedModel inference
+numpy>=1.24.0
+opencv-python-headless>=4.8.0  # image preprocessing (tanpa GUI)
+Pillow>=10.0.0            # fallback decoder (WebP, dll.)
+
+# ── Fuzzy Logic ───────────────────────────────────────────────────────────────
+scikit-fuzzy>=0.4.2
+scipy>=1.11.0
+networkx>=3.0
