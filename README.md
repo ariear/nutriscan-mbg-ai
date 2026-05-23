@@ -12,7 +12,7 @@ Bagian AI dari aplikasi Nutriscan MBG
 
 | Endpoint | Method | Payload |
 |---|---|---|
-| http://localhost:6767/predict | POST | file:file |
+| http://localhost:6767/predict | POST | file:image |
 
 Contoh : 
 <img width="1467" height="551" alt="image" src="https://github.com/user-attachments/assets/0ec9c229-aed2-42b0-88f9-37f4cbbc1b7d" />
