@@ -4,6 +4,8 @@ import logging
 import cv2
 import numpy as np
 import tensorflow as tf
+import base64
+from app.core.config import CLASS_COLORS
 from PIL import Image
 
 from app.core.config import (
@@ -79,6 +81,15 @@ class InferenceService:
             for k, v in nutrisi_pixels.items()
         }
 
+    def _mask_to_base64(self, mask: np.ndarray) -> str:
+        color_mask = np.zeros((mask.shape[0], mask.shape[1], 3), dtype=np.uint8)
+        for cls_id, color in CLASS_COLORS.items():
+            color_mask[mask == cls_id] = color
+            
+        color_mask_bgr = cv2.cvtColor(color_mask, cv2.COLOR_RGB2BGR)
+        _, buffer = cv2.imencode('.png', color_mask_bgr)
+        return base64.b64encode(buffer).decode('utf-8')
+
     def analyze(self, image_bytes: bytes) -> dict:
         img_tensor   = self.preprocess(image_bytes)
         pred_mask    = self.segment(img_tensor)
@@ -91,6 +102,9 @@ class InferenceService:
             detail=clf["detail"],
             healthy_score=clf["healthy_score"]
         )
+        
+        foto_ompreng_b64 = base64.b64encode(image_bytes).decode('utf-8')
+        segmentasi_makanan_b64 = self._mask_to_base64(pred_mask)
 
         return {
             "nutrisi_proporsi": nutrisi_prop,
@@ -98,4 +112,6 @@ class InferenceService:
             "detail"          : clf["detail"],
             "healthy_score"   : clf["healthy_score"],
             "rekomendasi"     : rekomendasi,
+            "foto_ompreng"    : foto_ompreng_b64,
+            "segmentasi_makanan": segmentasi_makanan_b64,
         }
