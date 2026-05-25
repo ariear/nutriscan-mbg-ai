@@ -2,7 +2,7 @@
 Bagian AI dari aplikasi Nutriscan MBG
 
 ## Demo
-Link Demo : [arieai-nutriscan-mbg-ai.hf.space](arieai-nutriscan-mbg-ai.hf.space)
+Link Demo : [arieai-nutriscan-mbg-ai.hf.space](https://arieai-nutriscan-mbg-ai.hf.space)
 
 ## Panduan Setup
 1. Download model di sini https://drive.google.com/file/d/1FIB96vQQdrkQxddK9bluWFlIezLeK5jS/view?usp=sharing
