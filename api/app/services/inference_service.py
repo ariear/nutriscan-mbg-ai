@@ -90,6 +90,77 @@ class InferenceService:
         _, buffer = cv2.imencode('.png', color_mask_bgr)
         return base64.b64encode(buffer).decode('utf-8')
 
+    def _extract_bounding_boxes(
+        self,
+        pred_mask: np.ndarray,
+        min_area: int = 150,
+    ) -> list[dict]:
+        """
+        Extract axis-aligned bounding boxes for every detected food class.
+
+        For each non-background class present in `pred_mask`, the method:
+          1. Builds a binary mask isolating that class.
+          2. Runs cv2.findContours to locate all connected regions.
+          3. Filters out noise contours whose area is below `min_area`.
+          4. Converts each surviving contour to a bounding rect via
+             cv2.boundingRect and records the result.
+
+        Args:
+            pred_mask: 2-D NumPy array of shape (H, W) with integer class IDs.
+            min_area:  Minimum contour area (in pixels) to keep. Contours
+                       smaller than this are treated as segmentation noise
+                       and discarded. Default: 150 px².
+
+        Returns:
+            A list of dicts ordered by class_id, each with the keys:
+              - label     (str)  : Human-readable food class name.
+              - class_id  (int)  : Integer class ID from CLASS_MAPPING.
+              - x         (int)  : Left edge of the bounding box (pixels).
+              - y         (int)  : Top edge of the bounding box (pixels).
+              - width     (int)  : Width of the bounding box (pixels).
+              - height    (int)  : Height of the bounding box (pixels).
+        """
+        detections: list[dict] = []
+
+        for cls_id, label in CLASS_MAPPING.items():
+            # Skip the background class — it needs no bounding box.
+            if cls_id == 0:
+                continue
+
+            # Build a uint8 binary mask: 255 where this class was predicted.
+            binary_mask = np.where(pred_mask == cls_id, 255, 0).astype(np.uint8)
+
+            # Skip entirely if the class is absent in this prediction.
+            if binary_mask.max() == 0:
+                continue
+
+            # Find external contours of connected regions.
+            contours, _ = cv2.findContours(
+                binary_mask,
+                cv2.RETR_EXTERNAL,
+                cv2.CHAIN_APPROX_SIMPLE,
+            )
+
+            for contour in contours:
+                area = cv2.contourArea(contour)
+                if area < min_area:
+                    # Ignore tiny blobs that are likely segmentation noise.
+                    continue
+
+                x, y, w, h = cv2.boundingRect(contour)
+                detections.append({
+                    "label"    : label,
+                    "class_id" : cls_id,
+                    "x"        : int(x),
+                    "y"        : int(y),
+                    "width"    : int(w),
+                    "height"   : int(h),
+                })
+
+        # Sort by class_id so the order is deterministic.
+        detections.sort(key=lambda d: (d["class_id"], d["y"], d["x"]))
+        return detections
+
     def analyze(self, image_bytes: bytes) -> dict:
         img_tensor   = self.preprocess(image_bytes)
         pred_mask    = self.segment(img_tensor)
@@ -102,16 +173,18 @@ class InferenceService:
             detail=clf["detail"],
             healthy_score=clf["healthy_score"]
         )
-        
-        foto_ompreng_b64 = base64.b64encode(image_bytes).decode('utf-8')
+
+        foto_ompreng_b64       = base64.b64encode(image_bytes).decode('utf-8')
         segmentasi_makanan_b64 = self._mask_to_base64(pred_mask)
+        deteksi_makanan        = self._extract_bounding_boxes(pred_mask)
 
         return {
-            "nutrisi_proporsi": nutrisi_prop,
-            "status"          : clf["status"],
-            "detail"          : clf["detail"],
-            "healthy_score"   : clf["healthy_score"],
-            "rekomendasi"     : rekomendasi,
-            "foto_ompreng"    : foto_ompreng_b64,
+            "nutrisi_proporsi"  : nutrisi_prop,
+            "status"            : clf["status"],
+            "detail"            : clf["detail"],
+            "healthy_score"     : clf["healthy_score"],
+            "rekomendasi"       : rekomendasi,
+            "foto_ompreng"      : foto_ompreng_b64,
             "segmentasi_makanan": segmentasi_makanan_b64,
+            "deteksi_makanan"   : deteksi_makanan,
         }
