@@ -4,11 +4,9 @@ from skfuzzy import control as ctrl
 
 class FuzzyNutritionClassifier:
     STATUS_LABELS = {
-        (75, 101): "seimbang",
-        (55,  75): "cukup_seimbang",
-        (35,  55): "kurang_seimbang",
-        (15,  35): "tidak_seimbang",
-        (0,   15): "sangat_tidak_seimbang",
+        (50, 101): "seimbang",
+        (20,  50): "kurang_seimbang",
+        (0,   20): "tidak_seimbang",
     }
 
     def __init__(self) -> None:
@@ -66,7 +64,7 @@ class FuzzyNutritionClassifier:
 
             ctrl.Rule(
                 self.susu["tidak_ada"] & self.karbo["sedang"] & self.protein["cukup"],
-                self.score["sedang"],
+                self.score["baik"],
             ),
 
             ctrl.Rule(
