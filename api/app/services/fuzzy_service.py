@@ -4,11 +4,11 @@ from skfuzzy import control as ctrl
 
 class FuzzyNutritionClassifier:
     STATUS_LABELS = {
-        (80, 101): "seimbang",
-        (60,  80): "cukup_seimbang",
-        (40,  60): "kurang_seimbang",
-        (20,  40): "tidak_seimbang",
-        (0,   20): "sangat_tidak_seimbang",
+        (75, 101): "seimbang",
+        (55,  75): "cukup_seimbang",
+        (35,  55): "kurang_seimbang",
+        (15,  35): "tidak_seimbang",
+        (0,   15): "sangat_tidak_seimbang",
     }
 
     def __init__(self) -> None:
@@ -25,13 +25,13 @@ class FuzzyNutritionClassifier:
         self.karbo["sedang"] = fuzz.trimf(self.karbo.universe, [30,  50, 70])
         self.karbo["tinggi"] = fuzz.trimf(self.karbo.universe, [60, 100, 100])
         self.protein["kurang"] = fuzz.trimf(self.protein.universe, [0,   0,  20])
-        self.protein["cukup"]  = fuzz.trimf(self.protein.universe, [15,  25, 35])
+        self.protein["cukup"]  = fuzz.trimf(self.protein.universe, [10,  25, 45])
         self.protein["lebih"]  = fuzz.trimf(self.protein.universe, [30, 100, 100])
-        self.serat["kurang"] = fuzz.trimf(self.serat.universe, [0,   0,  20])
-        self.serat["cukup"]  = fuzz.trimf(self.serat.universe, [15,  25, 40])
-        self.serat["lebih"]  = fuzz.trimf(self.serat.universe, [35, 100, 100])
-        self.susu["tidak_ada"] = fuzz.trimf(self.susu.universe, [0,   0,  5])
-        self.susu["ada"]       = fuzz.trimf(self.susu.universe, [3,  100, 100])
+        self.serat["kurang"] = fuzz.trimf(self.serat.universe, [0,   0,  12])
+        self.serat["cukup"]  = fuzz.trimf(self.serat.universe, [8,  20,  35])
+        self.serat["lebih"]  = fuzz.trimf(self.serat.universe, [30, 100, 100])
+        self.susu["tidak_ada"] = fuzz.trimf(self.susu.universe, [0,   0,   5])
+        self.susu["ada"]       = fuzz.trapmf(self.susu.universe, [2,  8, 100, 100])
         self.score["sangat_buruk"] = fuzz.trimf(self.score.universe, [0,   0,  20])
         self.score["buruk"]        = fuzz.trimf(self.score.universe, [10,  25, 40])
         self.score["sedang"]       = fuzz.trimf(self.score.universe, [30,  50, 70])
@@ -76,6 +76,11 @@ class FuzzyNutritionClassifier:
             ctrl.Rule(
                 self.karbo["sedang"] & self.protein["cukup"] & self.serat["kurang"],
                 self.score["sedang"],
+            ),
+
+            ctrl.Rule(
+                self.karbo["sedang"] & self.protein["cukup"] & self.serat["lebih"],
+                self.score["baik"],
             ),
         ]
 
