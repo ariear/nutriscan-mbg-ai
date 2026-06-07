@@ -80,6 +80,24 @@ class FuzzyNutritionClassifier:
                 self.karbo["sedang"] & self.protein["cukup"] & self.serat["lebih"],
                 self.score["baik"],
             ),
+            
+            ctrl.Rule(
+                self.karbo["rendah"] & self.protein["cukup"] &
+                self.serat["lebih"] & self.susu["ada"],
+                self.score["sangat_baik"],
+            ),
+            
+            ctrl.Rule(
+                self.karbo["rendah"] & self.protein["cukup"] &
+                self.serat["lebih"] & self.susu["tidak_ada"],
+                self.score["baik"],
+            ),
+            
+            ctrl.Rule(
+                self.karbo["rendah"] & self.protein["cukup"] &
+                self.serat["cukup"],
+                self.score["baik"],
+            ),
         ]
 
         self.ctrl_system = ctrl.ControlSystem(rules)
@@ -95,7 +113,7 @@ class FuzzyNutritionClassifier:
             self.simulation.compute()
             healthy_score = round(float(self.simulation.output["score"]), 1)
         except Exception:
-            healthy_score = 50.0
+            healthy_score = 0
 
         status = "tidak_seimbang"
         for (low, high), lbl in self.STATUS_LABELS.items():
