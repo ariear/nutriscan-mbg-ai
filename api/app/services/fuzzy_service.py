@@ -146,7 +146,7 @@ class FuzzyNutritionClassifier:
             return "serat_kurang"
         if u == 0:
             return "tanpa_susu"
-        if 35 <= k <= 65 and p >= 15 and s >= 15 and u > 0:
+        if 20 <= k <= 70 and p >= 15 and s >= 15 and u > 0:
             return "seimbang"
         return "kurang_seimbang"
 
